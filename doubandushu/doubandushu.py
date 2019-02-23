@@ -39,6 +39,8 @@ def getBooks(url):
     r = requests.get(url=url,headers=headers)
     html = etree.HTML(r.text)
     bookNames = html.xpath("//div[@class='info']/h2/a")
+    if len(bookNames) == 0:
+        return
     bookDetails = html.xpath("//div[@class='info']/div[@class='pub']")
     bookRatingNums = html.xpath("//div[@class='info']//span[@class='rating_nums']")
     bookEvaluateNums = html.xpath("//div[@class='info']//span[@class='pl']")
@@ -64,13 +66,16 @@ def handler_url(tag):
     ws['C1'] = "评分"
     ws['D1'] = "评论人数"
     num = 0
-    while(num<1000):
+    while(True):
         url = domain_url+tag+"?start="+str(num)+"&type=S"
         books = getBooks(url)
-        for book in books:
-            if int(book["num"]) > 1000:
-                ws.append([book["name"],book["detail"],book["rating"],book["num"]])
-        num = num+20
+        if books == None:
+            break
+        else:
+            for book in books:
+                if int(book["num"]) > 1000:
+                    ws.append([book["name"],book["detail"],book["rating"],book["num"]])
+            num = num+20
     wb.save("doubandushu.xlsx")
 
 bookTagList = getBookTagList()
